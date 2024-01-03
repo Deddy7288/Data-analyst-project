@@ -1,0 +1,58 @@
+select * from ds_salaries;
+
+-- 1. cek data null
+select * from ds_salaries where work_year is null;
+
+-- 2. Cek job title apa saja yang ada
+select distinct job_title
+from ds_salaries
+order by job_title;
+
+-- 3. Job yang berkaitan dengan data analisyt
+select distinct job_title
+from ds_salaries
+where job_title like '%data analyst%'
+order by job_title;
+
+-- 4. Rata-rata gaji berdasarkan experinece level
+select experience_level,
+(avg(salary_in_usd)*15000)/12
+as avg_gaji
+from ds_salaries
+group by experience_level;
+
+-- 5. Negara dengan gaji menarik berdasarkan experience
+select company_location,
+avg(salary_in_usd)
+from ds_salaries
+where job_title like '%data analyst%'
+	and employment_type = 'FT'
+    and experience_level in ('MI', 'SE')
+group by company_location;
+
+-- 6. Gaji rata-rata data analyst berdasarkan pengalaman
+with ds_1 as (
+select work_year,
+	avg(salary_in_usd) salary_ex
+from ds_salaries
+		where employment_type = 'FT'
+        and experience_level = 'EX'
+        and job_title like '%data analyst%'
+	group by work_year
+), ds_2 as (
+select work_year,
+	avg(salary_in_usd) salary_mi
+from ds_salaries
+		where employment_type = 'FT'
+        and experience_level = 'MI'
+        and job_title like '%data analyst%'
+	group by work_year
+) select ds_1.work_year,
+salary_ex,
+salary_mi,
+salary_ex - salary_mi diffrence
+from ds_1
+left outer join ds_2
+	on ds_1.work_year = ds_2.work_year;
+    
+    
